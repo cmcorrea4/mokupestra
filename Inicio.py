@@ -167,7 +167,7 @@ with col1:
         st.dataframe(df_grafico, use_container_width=True)
 
 with col2:
-    st.subheader("🤖 Asistente ESTRA")
+    st.subheader("🤖 ¡Hola! Soy tú asistente S.O.S EnergIA")
     
     # Inicializar el historial de chat
     if "mensajes" not in st.session_state:
@@ -175,7 +175,7 @@ with col2:
         # Mensaje de bienvenida
         st.session_state.mensajes.append({
             "role": "assistant", 
-            "content": "¡Hola! Soy tú asistente S.O.S EnergIA. ¿En qué puedo ayudarte respecto a análisis de Gestión energética?"
+            "content": "¿En que puedo ayudarte desde nuestro centro de analítica de datos para el Sistema de Gestión Energética?"
         })
     
     # Mostrar historial de mensajes
