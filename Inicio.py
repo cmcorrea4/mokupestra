@@ -10,7 +10,7 @@ st.set_page_config(
 )
 
 # Título principal
-st.title("🏭 ESTRA - Sistema de Monitoreo Energético Industrial")
+st.title("🏭 ESTRA - Plataforma inteligente de Analítica en consumo de Energía")
 
 # Función para generar datos sintéticos
 def generar_datos_energia(centro, semanas=24):
@@ -63,14 +63,14 @@ def mostrar_estadisticas(centro_seleccionado):
     
     with col1:
         st.metric(
-            label="Consumo Teórico Promedio",
+            label="CUSUM  Esperado",
             value=f"{np.mean(consumo_teorico):.1f} kWh",
             delta=f"±{np.std(consumo_teorico):.1f}"
         )
     
     with col2:
         st.metric(
-            label="Consumo Real Promedio", 
+            label="CUSUM Alcanzado", 
             value=f"{np.mean(consumo_real):.1f} kWh",
             delta=f"±{np.std(consumo_real):.1f}"
         )
@@ -175,7 +175,7 @@ with col2:
         # Mensaje de bienvenida
         st.session_state.mensajes.append({
             "role": "assistant", 
-            "content": "¡Hola! Soy el asistente de ESTRA. ¿En qué puedo ayudarte con el monitoreo energético?"
+            "content": "¡Hola! Soy tú asistente S.O.S EnergIA. ¿En qué puedo ayudarte respecto a análisis de Gestión energética?"
         })
     
     # Mostrar historial de mensajes
