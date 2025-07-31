@@ -151,8 +151,8 @@ with col1:
     # Crear DataFrame para el gráfico
     df_grafico = pd.DataFrame({
         'Semana': tiempo,
-        'Consumo Teórico': cusum_esperado,
-        'Consumo Real': consumo_alcanzado
+        'Consumo Teórico': consumo_teorico,
+        'Consumo Real': consumo_real
     })
     
     # Mostrar gráfico de líneas
