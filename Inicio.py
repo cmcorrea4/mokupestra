@@ -113,11 +113,9 @@ st.sidebar.subheader("🔧 Información de Máquina")
 
 info_maquinas = {
     "Inyectora HAITIAN MA-1200": {
-        "Tipo": "Inyección por Tornillo",
-        "Capacidad": "1,200 gr",
+        "Tipo": "Hidraúlica",
+        "Fuerza de cierre": "120 Ton",
         "Potencia": "185 kW",
-        "Material": "PP, PE, ABS",
-        "Estado": "🟢 Operativa"
     },
     "Extrusora LEISTRITZ ZSE-27": {
         "Tipo": "Extrusión Doble Tornillo",
@@ -143,7 +141,7 @@ for key, value in info.items():
 col1, col2 = st.columns([2, 1])
 
 with col1:
-    st.subheader(f"⚡ Análisis Energético - {maquina_seleccionada}")
+    st.subheader(f"⚡ CUSUM - {maquina_seleccionada}")
     
     # Generar y mostrar gráfico
     tiempo, consumo_teorico, consumo_real = generar_datos_energia(maquina_seleccionada)
