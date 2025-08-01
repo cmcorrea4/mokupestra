@@ -4,13 +4,13 @@ import numpy as np
 
 # Configuración de la página
 st.set_page_config(
-    page_title="ESTRA - Monitoreo Energético",
+    page_title="ESTRA - Análisis Energético",
     page_icon="🏭",
     layout="wide"
 )
 
 # Título principal
-st.title("🏭 ESTRA - Plataforma inteligente de Analítica en consumo de Energía")
+st.title("ESTRA - Plataforma inteligente de Analítica de eficiencia energética y productiva")
 
 # Función para generar datos sintéticos
 def generar_datos_energia(centro, semanas=24):
