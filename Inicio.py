@@ -19,7 +19,7 @@ def generar_datos_energia(centro, semanas=24):
     
     # Parámetros base para cada máquina
     parametros = {
-        "Inyectora HAITIAN MA-1200": {
+        "H75": {
             "base": 180,
             "amplitud1": 35,
             "amplitud2": 25,
@@ -45,46 +45,46 @@ def generar_datos_energia(centro, semanas=24):
     params = parametros[centro]
     
     # Generar curvas simétricas
-    consumo_teorico = params["base"] + params["amplitud1"] * np.sin(2 * np.pi * tiempo / semanas + params["fase1"])
-    consumo_real = params["base"] - params["amplitud2"] * np.sin(2 * np.pi * tiempo / semanas + params["fase2"])
+    frente_a_abt = params["base"] + params["amplitud1"] * np.sin(2 * np.pi * tiempo / semanas + params["fase1"])
+    frente_a_linea_base = params["base"] - params["amplitud2"] * np.sin(2 * np.pi * tiempo / semanas + params["fase2"])
     
     # Asegurar que empiecen y terminen en el mismo punto
-    consumo_teorico[0] = consumo_teorico[-1] = params["base"]
-    consumo_real[0] = consumo_real[-1] = params["base"]
+    frente_a_abt[0] = frente_a_abt[-1] = params["base"]
+    frente_a_linea_base[0] = frente_a_linea_base[-1] = params["base"]
     
-    return tiempo, consumo_teorico, consumo_real
+    return tiempo, frente_a_abt, frente_a_linea_base
 
 # Función para mostrar estadísticas
 def mostrar_estadisticas(centro_seleccionado):
     """Muestra estadísticas del centro seleccionado"""
-    tiempo, consumo_teorico, consumo_real = generar_datos_energia(centro_seleccionado)
+    tiempo, frente_a_abt, frente_a_linea_base = generar_datos_energia(centro_seleccionado)
     
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
         st.metric(
             label="CUSUM  Esperado",
-            value=f"{np.mean(consumo_teorico):.1f} kWh",
-            delta=f"±{np.std(consumo_teorico):.1f}"
+            value=f"{np.mean(frente_a_abt):.1f} kWh",
+            delta=f"±{np.std(frente_a_abt):.1f}"
         )
     
     with col2:
         st.metric(
             label="CUSUM Alcanzado", 
-            value=f"{np.mean(consumo_real):.1f} kWh",
-            delta=f"±{np.std(consumo_real):.1f}"
+            value=f"{np.mean(frente_a_linea_base):.1f} kWh",
+            delta=f"±{np.std(frente_a_linea_base):.1f}"
         )
     
     with col3:
-        diferencia = np.mean(consumo_real) - np.mean(consumo_teorico)
+        diferencia = np.mean(frente_a_linea_base) - np.mean(frente_a_abt)
         st.metric(
             label="Desviación Energética",
             value=f"{diferencia:.1f} kWh",
-            delta=f"{(diferencia/np.mean(consumo_teorico)*100):.1f}%"
+            delta=f"{(diferencia/np.mean(frente_a_abt)*100):.1f}%"
         )
     
     with col4:
-        eficiencia = (1 - abs(diferencia)/np.mean(consumo_teorico)) * 100
+        eficiencia = (1 - abs(diferencia)/np.mean(frente_a_abt)) * 100
         st.metric(
             label="Eficiencia Energética",
             value=f"{eficiencia:.1f}%",
@@ -96,7 +96,7 @@ st.sidebar.header("🔧 Panel de Control")
 
 # Selectbox para máquinas
 maquinas = [
-    "Inyectora HAITIAN MA-1200",
+    "H75",
     "Extrusora LEISTRITZ ZSE-27", 
     "Inyectora ENGEL e-motion 310"
 ]
@@ -112,7 +112,7 @@ st.sidebar.markdown("---")
 st.sidebar.subheader("🔧 Información de Máquina")
 
 info_maquinas = {
-    "Inyectora HAITIAN MA-1200": {
+    "H75": {
         "Tipo": "Hidraúlica",
         "Fuerza de cierre": "120 Ton",
         "Potencia": "185 kW",
@@ -144,20 +144,20 @@ with col1:
     st.subheader(f"⚡ CUSUM - {maquina_seleccionada}")
     
     # Generar y mostrar gráfico
-    tiempo, consumo_teorico, consumo_real = generar_datos_energia(maquina_seleccionada)
+    tiempo, frente_a_abt, frente_a_linea_base = generar_datos_energia(maquina_seleccionada)
     
     # Crear DataFrame para el gráfico
     df_grafico = pd.DataFrame({
         'Semana': tiempo,
-        'Consumo Teórico': consumo_teorico,
-        'Consumo Real': consumo_real
+        'Frente a ABT': frente_a_abt,
+        'Frente a Linea Base': frente_a_linea_base
     })
     
     # Mostrar gráfico de líneas
     st.line_chart(df_grafico.set_index('Semana'))
     
     # Mostrar estadísticas
-    st.subheader("📊 Métricas de Rendimiento Energético")
+    st.subheader("📊 Métricas de Control")
     mostrar_estadisticas(maquina_seleccionada)
     
     # Tabla de datos
@@ -173,7 +173,7 @@ with col2:
         # Mensaje de bienvenida
         st.session_state.mensajes.append({
             "role": "assistant", 
-            "content": "¿En que puedo ayudarte desde nuestro centro de analítica de datos para el Sistema de Gestión Energética?"
+            "content": "¿En que puedo ayudarte desde nuestro centro de analítica de datos para el Sistema de Gestión Energética?"
         })
     
     # Mostrar historial de mensajes
@@ -190,29 +190,29 @@ with col2:
         
         # Generar respuesta del asistente
         with st.chat_message("assistant"):
-            tiempo, consumo_teorico, consumo_real = generar_datos_energia(maquina_seleccionada)
+            tiempo, frente_a_abt, frente_a_linea_base = generar_datos_energia(maquina_seleccionada)
             
             # Respuestas basadas en palabras clave
             if "consumo" in prompt.lower():
-                respuesta = f"La {maquina_seleccionada} tiene un consumo teórico promedio de {np.mean(consumo_teorico):.1f} kWh y real de {np.mean(consumo_real):.1f} kWh por semana."
+                respuesta = f"La {maquina_seleccionada} tiene un consumo teórico promedio de {np.mean(frente_a_abt):.1f} kWh y real de {np.mean(frente_a_linea_base):.1f} kWh por semana."
             elif "eficiencia" in prompt.lower():
-                diferencia = np.mean(consumo_real) - np.mean(consumo_teorico)
-                eficiencia = (1 - abs(diferencia)/np.mean(consumo_teorico)) * 100
+                diferencia = np.mean(frente_a_linea_base) - np.mean(frente_a_abt)
+                eficiencia = (1 - abs(diferencia)/np.mean(frente_a_abt)) * 100
                 respuesta = f"La eficiencia energética es del {eficiencia:.1f}%. {'🟢 Excelente rendimiento.' if eficiencia > 90 else '🟡 Se recomienda revisión.'}"
             elif "máximo" in prompt.lower() or "pico" in prompt.lower():
-                respuesta = f"Pico máximo: Teórico {np.max(consumo_teorico):.1f} kWh, Real {np.max(consumo_real):.1f} kWh."
+                respuesta = f"Pico máximo: Teórico {np.max(frente_a_abt):.1f} kWh, Real {np.max(frente_a_linea_base):.1f} kWh."
             elif "mínimo" in prompt.lower():
-                respuesta = f"Consumo mínimo: Teórico {np.min(consumo_teorico):.1f} kWh, Real {np.min(consumo_real):.1f} kWh."
+                respuesta = f"Consumo mínimo: Teórico {np.min(frente_a_abt):.1f} kWh, Real {np.min(frente_a_linea_base):.1f} kWh."
             elif "material" in prompt.lower():
                 materiales = {
-                    "Inyectora HAITIAN MA-1200": "PP, PE, ABS", 
+                    "H75": "PP, PE, ABS", 
                     "Extrusora LEISTRITZ ZSE-27": "PVC, PP, Compounds", 
                     "Inyectora ENGEL e-motion 310": "PET, PA, PC"
                 }
                 respuesta = f"Materiales procesados: {materiales.get(maquina_seleccionada, 'N/A')}"
             elif "estado" in prompt.lower() or "mantenimiento" in prompt.lower():
                 estados = {
-                    "Inyectora HAITIAN MA-1200": "🟢 Operativa - Funcionamiento normal", 
+                    "H75": "🟢 Operativa - Funcionamiento normal", 
                     "Extrusora LEISTRITZ ZSE-27": "🟢 Operativa - Funcionamiento normal", 
                     "Inyectora ENGEL e-motion 310": "🟡 En mantenimiento preventivo"
                 }
@@ -239,9 +239,9 @@ with col_btn2:
     if st.button("🔄 Actualizar Datos"):
         st.rerun()
 
-# Resumen ejecutivo
+# Métricas de Diagnóstico
 st.markdown("---")
-st.subheader("📈 Resumen Ejecutivo ESTRA")
+st.subheader("📈 Métricas de Diagnóstico")
 
 col_res1, col_res2, col_res3 = st.columns(3)
 
