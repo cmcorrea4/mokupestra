@@ -13,9 +13,9 @@ st.set_page_config(
 st.title("ESTRA - Plataforma inteligente de Analítica de eficiencia energética y productiva")
 
 # Función para generar datos sintéticos
-def generar_datos_energia(centro, semanas=24):
-    """Genera datos sintéticos para cada centro de costos"""
-    tiempo = np.arange(1, semanas + 1)
+def generar_datos_energia(centro, periodo="Semana", numero_periodos=24):
+    """Genera datos sintéticos para cada centro de costos según el periodo seleccionado"""
+    tiempo = np.arange(1, numero_periodos + 1)
     
     # Parámetros base para cada máquina
     parametros = {
@@ -44,20 +44,42 @@ def generar_datos_energia(centro, semanas=24):
     
     params = parametros[centro]
     
+    # Ajustar valores base según el periodo
+    factor_periodo = {
+        "Día": 1/7,      # Factor diario (1/7 de la semana)
+        "Semana": 1,     # Factor base
+        "Mes": 4.33      # Factor mensual (aprox 4.33 semanas por mes)
+    }
+    
+    factor = factor_periodo.get(periodo, 1)
+    base_ajustada = params["base"] * factor
+    amp1_ajustada = params["amplitud1"] * factor
+    amp2_ajustada = params["amplitud2"] * factor
+    
     # Generar curvas simétricas
-    frente_a_abt = params["base"] + params["amplitud1"] * np.sin(2 * np.pi * tiempo / semanas + params["fase1"])
-    frente_a_linea_base = params["base"] - params["amplitud2"] * np.sin(2 * np.pi * tiempo / semanas + params["fase2"])
+    frente_a_abt = base_ajustada + amp1_ajustada * np.sin(2 * np.pi * tiempo / numero_periodos + params["fase1"])
+    frente_a_linea_base = base_ajustada - amp2_ajustada * np.sin(2 * np.pi * tiempo / numero_periodos + params["fase2"])
     
     # Asegurar que empiecen y terminen en el mismo punto
-    frente_a_abt[0] = frente_a_abt[-1] = params["base"]
-    frente_a_linea_base[0] = frente_a_linea_base[-1] = params["base"]
+    frente_a_abt[0] = frente_a_abt[-1] = base_ajustada
+    frente_a_linea_base[0] = frente_a_linea_base[-1] = base_ajustada
     
     return tiempo, frente_a_abt, frente_a_linea_base
 
 # Función para mostrar estadísticas
-def mostrar_estadisticas(centro_seleccionado):
+def mostrar_estadisticas(centro_seleccionado, periodo_seleccionado):
     """Muestra estadísticas del centro seleccionado"""
-    tiempo, frente_a_abt, frente_a_linea_base = generar_datos_energia(centro_seleccionado)
+    numero_periodos = {
+        "Día": 30,      # 30 días
+        "Semana": 24,   # 24 semanas
+        "Mes": 12       # 12 meses
+    }
+    
+    tiempo, frente_a_abt, frente_a_linea_base = generar_datos_energia(
+        centro_seleccionado, 
+        periodo_seleccionado, 
+        numero_periodos[periodo_seleccionado]
+    )
     
     col1, col2, col3, col4, col5 = st.columns(5)
     
@@ -75,7 +97,6 @@ def mostrar_estadisticas(centro_seleccionado):
         st.metric(
             label="CUSUM ABT", 
             value=f"-{CABT:.1f} M",
-            #delta=f"±{np.std(frente_a_linea_base):.1f}"
         )
     
     with col3:
@@ -83,7 +104,6 @@ def mostrar_estadisticas(centro_seleccionado):
         st.metric(
             label="C02 Eq.",
             value=f"{COeq:.1f} Ton",
-            #delta=f"{(diferencia/np.mean(frente_a_abt)*100):.1f}%"
         )
     
     with col4:
@@ -93,18 +113,14 @@ def mostrar_estadisticas(centro_seleccionado):
             label="Tendencia",
             value=f"{Tendencia} ",
             delta=f"{(delta_ten):.1f}%"
-            
         )
         
-     
     with col5:
         Resultado="Mejora"
         st.metric(
             label="Resultado",
             value=f"{Resultado} "
-            
         )       
-        
 
 # Sidebar para controles
 st.sidebar.header("🔧 Panel de Control")
@@ -121,6 +137,22 @@ maquina_seleccionada = st.sidebar.selectbox(
     maquinas,
     index=0
 )
+
+# Selectbox para periodo de consulta
+st.sidebar.markdown("---")
+periodo_seleccionado = st.sidebar.selectbox(
+    "📅 Selecciona el periodo de consulta:",
+    ["Día", "Semana", "Mes"],
+    index=1  # Por defecto "Semana"
+)
+
+# Información adicional del periodo
+info_periodo = {
+    "Día": "📊 Análisis diario (últimos 30 días)",
+    "Semana": "📊 Análisis semanal (últimas 24 semanas)", 
+    "Mes": "📊 Análisis mensual (últimos 12 meses)"
+}
+st.sidebar.info(info_periodo[periodo_seleccionado])
 
 # Información de la máquina seleccionada
 st.sidebar.markdown("---")
@@ -156,24 +188,40 @@ for key, value in info.items():
 col1, col2 = st.columns([2, 1])
 
 with col1:
-    st.subheader(f"⚡ CUSUM - {maquina_seleccionada}")
+    st.subheader(f"⚡ CUSUM - {maquina_seleccionada} ({periodo_seleccionado})")
     
     # Generar y mostrar gráfico
-    tiempo, frente_a_abt, frente_a_linea_base = generar_datos_energia(maquina_seleccionada)
+    numero_periodos = {
+        "Día": 30,      # 30 días
+        "Semana": 24,   # 24 semanas
+        "Mes": 12       # 12 meses
+    }
+    
+    tiempo, frente_a_abt, frente_a_linea_base = generar_datos_energia(
+        maquina_seleccionada, 
+        periodo_seleccionado, 
+        numero_periodos[periodo_seleccionado]
+    )
     
     # Crear DataFrame para el gráfico
+    etiqueta_tiempo = {
+        "Día": "Día",
+        "Semana": "Semana",
+        "Mes": "Mes"
+    }
+    
     df_grafico = pd.DataFrame({
-        'Semana': tiempo,
+        etiqueta_tiempo[periodo_seleccionado]: tiempo,
         'Frente a ABT': frente_a_abt,
         'Frente a Linea Base': frente_a_linea_base
     })
     
     # Mostrar gráfico de líneas
-    st.line_chart(df_grafico.set_index('Semana'))
+    st.line_chart(df_grafico.set_index(etiqueta_tiempo[periodo_seleccionado]))
     
     # Mostrar estadísticas
     st.subheader("📊 Métricas de Control")
-    mostrar_estadisticas(maquina_seleccionada)
+    mostrar_estadisticas(maquina_seleccionada, periodo_seleccionado)
     
     # Tabla de datos
     with st.expander("📋 Ver Datos Detallados"):
@@ -205,19 +253,39 @@ with col2:
         
         # Generar respuesta del asistente
         with st.chat_message("assistant"):
-            tiempo, frente_a_abt, frente_a_linea_base = generar_datos_energia(maquina_seleccionada)
+            numero_periodos = {
+                "Día": 30,
+                "Semana": 24,
+                "Mes": 12
+            }
+            
+            tiempo, frente_a_abt, frente_a_linea_base = generar_datos_energia(
+                maquina_seleccionada, 
+                periodo_seleccionado, 
+                numero_periodos[periodo_seleccionado]
+            )
+            
+            # Unidades según el periodo
+            unidad_periodo = {
+                "Día": "kWh/día",
+                "Semana": "kWh/semana",
+                "Mes": "kWh/mes"
+            }
+            unidad = unidad_periodo[periodo_seleccionado]
             
             # Respuestas basadas en palabras clave
             if "consumo" in prompt.lower():
-                respuesta = f"La {maquina_seleccionada} tiene un consumo teórico promedio de {np.mean(frente_a_abt):.1f} kWh y real de {np.mean(frente_a_linea_base):.1f} kWh por semana."
+                respuesta = f"La {maquina_seleccionada} tiene un consumo teórico promedio de {np.mean(frente_a_abt):.1f} {unidad} y real de {np.mean(frente_a_linea_base):.1f} {unidad} (análisis {periodo_seleccionado.lower()})."
             elif "eficiencia" in prompt.lower():
                 diferencia = np.mean(frente_a_linea_base) - np.mean(frente_a_abt)
                 eficiencia = (1 - abs(diferencia)/np.mean(frente_a_abt)) * 100
-                respuesta = f"La eficiencia energética es del {eficiencia:.1f}%. {'🟢 Excelente rendimiento.' if eficiencia > 90 else '🟡 Se recomienda revisión.'}"
+                respuesta = f"La eficiencia energética {periodo_seleccionado.lower()} es del {eficiencia:.1f}%. {'🟢 Excelente rendimiento.' if eficiencia > 90 else '🟡 Se recomienda revisión.'}"
             elif "máximo" in prompt.lower() or "pico" in prompt.lower():
-                respuesta = f"Pico máximo: Teórico {np.max(frente_a_abt):.1f} kWh, Real {np.max(frente_a_linea_base):.1f} kWh."
+                respuesta = f"Pico máximo ({periodo_seleccionado.lower()}): Teórico {np.max(frente_a_abt):.1f} {unidad}, Real {np.max(frente_a_linea_base):.1f} {unidad}."
             elif "mínimo" in prompt.lower():
-                respuesta = f"Consumo mínimo: Teórico {np.min(frente_a_abt):.1f} kWh, Real {np.min(frente_a_linea_base):.1f} kWh."
+                respuesta = f"Consumo mínimo ({periodo_seleccionado.lower()}): Teórico {np.min(frente_a_abt):.1f} {unidad}, Real {np.min(frente_a_linea_base):.1f} {unidad}."
+            elif "periodo" in prompt.lower():
+                respuesta = f"Actualmente estás visualizando datos por {periodo_seleccionado.lower()}. Puedes cambiar el periodo en el panel de control del sidebar."
             elif "material" in prompt.lower():
                 materiales = {
                     "H75": "PP, PE, ABS", 
@@ -233,7 +301,7 @@ with col2:
                 }
                 respuesta = f"Estado actual: {estados.get(maquina_seleccionada, 'N/A')}"
             else:
-                respuesta = f"Analizando {maquina_seleccionada}. Puedes preguntar sobre: consumo, eficiencia, picos, materiales, estado o mantenimiento."
+                respuesta = f"Analizando {maquina_seleccionada} por {periodo_seleccionado.lower()}. Puedes preguntar sobre: consumo, eficiencia, picos, periodo, materiales, estado o mantenimiento."
             
             st.markdown(respuesta)
         
@@ -262,8 +330,18 @@ col_res1, col_res2, col_res3 = st.columns(3)
 
 # Calcular métricas globales
 todas_maquinas = []
+numero_periodos_calc = {
+    "Día": 30,
+    "Semana": 24,
+    "Mes": 12
+}
+
 for maquina in maquinas:
-    _, teorico, real = generar_datos_energia(maquina)
+    _, teorico, real = generar_datos_energia(
+        maquina, 
+        periodo_seleccionado, 
+        numero_periodos_calc[periodo_seleccionado]
+    )
     todas_maquinas.append({
         'maquina': maquina,
         'teorico': np.mean(teorico),
@@ -284,15 +362,14 @@ with col_res2:
 
 with col_res3:
     fpm=18
-    #maquinas_optimas = sum([1 for m in todas_maquinas if m['eficiencia'] > 90])
     st.metric("Flujo por Molde", f"{fpm:.0f} kg/h")
 
 # Footer
 st.markdown("---")
 st.markdown(
-    """
+    f"""
     <div style='text-align: center; color: gray; font-size: 14px;'>
-    🏭 ESTRA - Sistema de Análisis de Centros de Costos de Energía | Powered by SUME--SOSPOL
+    🏭 ESTRA - Sistema de Análisis de Centros de Costos de Energía | Análisis por {periodo_seleccionado} | Powered by SUME--SOSPOL
     </div>
     """, 
     unsafe_allow_html=True
