@@ -243,20 +243,18 @@ with col2:
     if len(st.session_state.mensajes) <= 2:
         st.markdown("**💡 Preguntas sugeridas:**")
         
+        # Inicializar pregunta seleccionada si no existe
+        if "pregunta_seleccionada" not in st.session_state:
+            st.session_state.pregunta_seleccionada = ""
+        
         if st.button("⚡ ¿Cuál es el consumo actual?", use_container_width=True):
-            prompt_sugerido = "¿Cuál es el consumo energético actual de esta máquina?"
-            st.session_state.mensajes.append({"role": "user", "content": prompt_sugerido})
-            st.rerun()
+            st.session_state.pregunta_seleccionada = "¿Cuál es el consumo energético actual de esta máquina?"
         
         if st.button("📊 ¿Cómo está la eficiencia?", use_container_width=True):
-            prompt_sugerido = "¿Cómo está la eficiencia energética de esta máquina?"
-            st.session_state.mensajes.append({"role": "user", "content": prompt_sugerido})
-            st.rerun()
+            st.session_state.pregunta_seleccionada = "¿Cómo está la eficiencia energética de esta máquina?"
             
         if st.button("🔧 ¿Cuál es el estado actual?", use_container_width=True):
-            prompt_sugerido = "¿Cuál es el estado actual de la máquina?"
-            st.session_state.mensajes.append({"role": "user", "content": prompt_sugerido})
-            st.rerun()
+            st.session_state.pregunta_seleccionada = "¿Cuál es el estado actual de la máquina?"
         
         st.markdown("---")
     
@@ -265,8 +263,33 @@ with col2:
         with st.chat_message(mensaje["role"]):
             st.markdown(mensaje["content"])
     
-    # Campo de entrada de texto
-    if prompt := st.chat_input("Consulta sobre las máquinas..."):
+    # Campo de entrada de texto con pregunta precargada
+    prompt_default = st.session_state.get("pregunta_seleccionada", "")
+    if prompt_default:
+        # Mostrar la pregunta seleccionada en un input editable
+        prompt = st.text_input("Consulta sobre las máquinas:", value=prompt_default, key="input_prompt")
+        if st.button("📤 Enviar pregunta", use_container_width=True):
+            if prompt.strip():
+                # Limpiar la pregunta seleccionada después de enviar
+                st.session_state.pregunta_seleccionada = ""
+                # Procesar la pregunta
+                st.session_state.mensajes.append({"role": "user", "content": prompt})
+                st.rerun()
+    else:
+        prompt = st.chat_input("Consulta sobre las máquinas...")
+    
+    # Botón limpiar chat en la columna del bot
+    if st.button("🗑️ Limpiar Chat", use_container_width=True):
+        st.session_state.mensajes = [{
+            "role": "assistant", 
+            "content": "Chat reiniciado. ¿En qué puedo ayudarte?"
+        }]
+        if "pregunta_seleccionada" in st.session_state:
+            st.session_state.pregunta_seleccionada = ""
+        st.rerun()
+    
+    # Procesar prompt si existe
+    if prompt and prompt.strip():
         # Agregar mensaje del usuario al historial
         st.session_state.mensajes.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
@@ -329,19 +352,9 @@ with col2:
         # Agregar respuesta al historial
         st.session_state.mensajes.append({"role": "assistant", "content": respuesta})
 
-# Botones de control
-col_btn1, col_btn2 = st.sidebar.columns(2)
-with col_btn1:
-    if st.button("🗑️ Limpiar Chat"):
-        st.session_state.mensajes = [{
-            "role": "assistant", 
-            "content": "Chat reiniciado. ¿En qué puedo ayudarte?"
-        }]
-        st.rerun()
-
-with col_btn2:
-    if st.button("🔄 Actualizar Datos"):
-        st.rerun()
+# Botón de control en el sidebar
+if st.sidebar.button("🔄 Actualizar Datos", use_container_width=True):
+    st.rerun()
 
 # Métricas de Diagnóstico
 st.markdown("---")
