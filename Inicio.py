@@ -269,15 +269,15 @@ with col_res2:
 
 with col_res3:
     fpm=18
-    maquinas_optimas = sum([1 for m in todas_maquinas if m['eficiencia'] > 90])
-    st.metric("Flujo por Molde", f"{fpm:0f} kg/h")
+    #maquinas_optimas = sum([1 for m in todas_maquinas if m['eficiencia'] > 90])
+    st.metric("Flujo por Molde", f"{fpm:.0f} kg/h")
 
 # Footer
 st.markdown("---")
 st.markdown(
     """
     <div style='text-align: center; color: gray; font-size: 14px;'>
-    🏭 ESTRA - Sistema de Monitoreo Energético Industrial | Powered by Streamlit
+    🏭 ESTRA - Sistema de Análisis de Centros de Costos de Energía | Powered by SUME y SOSPOL
     </div>
     """, 
     unsafe_allow_html=True
