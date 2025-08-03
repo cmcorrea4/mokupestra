@@ -74,7 +74,7 @@ def mostrar_estadisticas(centro_seleccionado):
         st.metric(
             label="CUSUM ABT", 
             value=f"-{CABT:.1f} MCOP",
-            delta=f"±{np.std(frente_a_linea_base):.1f}"
+            #delta=f"±{np.std(frente_a_linea_base):.1f}"
         )
     
     with col3:
@@ -82,7 +82,7 @@ def mostrar_estadisticas(centro_seleccionado):
         st.metric(
             label="C02 Eq.",
             value=f"{COeq:.1f} Ton",
-            delta=f"{(diferencia/np.mean(frente_a_abt)*100):.1f}%"
+            #delta=f"{(diferencia/np.mean(frente_a_abt)*100):.1f}%"
         )
     
     with col4:
