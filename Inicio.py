@@ -263,11 +263,14 @@ with col2:
         with st.chat_message(mensaje["role"]):
             st.markdown(mensaje["content"])
     
+    # Sección de input y botones al final
+    st.markdown("---")
+    
     # Campo de entrada de texto con pregunta precargada
     prompt_default = st.session_state.get("pregunta_seleccionada", "")
     if prompt_default:
         # Mostrar la pregunta seleccionada en un input editable
-        prompt = st.text_input("Escribe tú pregunta:", value=prompt_default, key="input_prompt")
+        prompt = st.text_input("Escribe tu consulta aquí:", value=prompt_default, key="input_prompt")
         if st.button("📤 Enviar pregunta", use_container_width=True):
             if prompt.strip():
                 # Limpiar la pregunta seleccionada después de enviar
@@ -276,14 +279,11 @@ with col2:
                 st.session_state.mensajes.append({"role": "user", "content": prompt})
                 st.rerun()
     else:
-        prompt = st.chat_input("Consulta sobre las máquinas...")
+        prompt = st.chat_input("Escribe tu consulta aquí...")
     
     # Botón limpiar chat en la columna del bot
     if st.button("🗑️ Limpiar Chat", use_container_width=True):
-        st.session_state.mensajes = [{
-            "role": "assistant", 
-            "content": "Chat reiniciado. ¿En qué puedo ayudarte?"
-        }]
+        st.session_state.mensajes = []
         if "pregunta_seleccionada" in st.session_state:
             st.session_state.pregunta_seleccionada = ""
         st.rerun()
