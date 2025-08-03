@@ -59,13 +59,13 @@ def mostrar_estadisticas(centro_seleccionado):
     """Muestra estadísticas del centro seleccionado"""
     tiempo, frente_a_abt, frente_a_linea_base = generar_datos_energia(centro_seleccionado)
     
-    col1, col2, col3, col4 = st.columns(4)
+    col1, col2, col3, col4, col5 = st.columns(5)
     
     with col1:
         CPCL=35
         st.metric(
             label="CUSUM  PCL",
-            value=f"+{CPCL:.0f} MCOP",
+            value=f"+{CPCL:.0f} M",
             delta=f"±{np.std(frente_a_abt):.1f}"
         )
     
@@ -73,7 +73,7 @@ def mostrar_estadisticas(centro_seleccionado):
         CABT=25
         st.metric(
             label="CUSUM ABT", 
-            value=f"-{CABT:.1f} MCOP",
+            value=f"-{CABT:.1f} M",
             #delta=f"±{np.std(frente_a_linea_base):.1f}"
         )
     
@@ -86,12 +86,22 @@ def mostrar_estadisticas(centro_seleccionado):
         )
     
     with col4:
-        Tendencia="Descendente"
+        Tendencia="DESC."
         st.metric(
             label="Tendencia",
             value=f"{Tendencia} ",
             
         )
+        
+     
+    with col5:
+        Resultado="Mejora"
+        st.metric(
+            label="Resultado",
+            value=f"{Resultado} "
+            
+        )       
+        
 
 # Sidebar para controles
 st.sidebar.header("🔧 Panel de Control")
