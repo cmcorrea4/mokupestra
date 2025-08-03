@@ -70,7 +70,7 @@ def mostrar_estadisticas(centro_seleccionado):
         )
     
     with col2:
-        CABT
+        CABT=25
         st.metric(
             label="CUSUM ABT", 
             value=f"-{CABT:.1f} Millones",
