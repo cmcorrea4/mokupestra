@@ -86,10 +86,12 @@ def mostrar_estadisticas(centro_seleccionado):
         )
     
     with col4:
-        Tendencia="DESC."
+        Tendencia="Desc."
+        delta_ten=4
         st.metric(
             label="Tendencia",
             value=f"{Tendencia} ",
+            delta=f"{(delta_ten*100):.1f}%"
             
         )
         
