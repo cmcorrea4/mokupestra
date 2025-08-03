@@ -63,10 +63,11 @@ def mostrar_estadisticas(centro_seleccionado):
     
     with col1:
         CPCL=35
+        delta_cpcl=2
         st.metric(
             label="CUSUM  PCL",
             value=f"+{CPCL:.0f} M",
-            delta=f"±{np.std(frente_a_abt):.1f}"
+            delta=f"±{delta_cpcl:.1f}"
         )
     
     with col2:
