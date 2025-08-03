@@ -258,13 +258,8 @@ with col2:
         
         st.markdown("---")
     
-    # Mostrar historial de mensajes
-    for mensaje in st.session_state.mensajes:
-        with st.chat_message(mensaje["role"]):
-            st.markdown(mensaje["content"])
-    
-    # Sección de input y botones al final
-    st.markdown("---")
+    # Procesar prompt antes de mostrar mensajes
+    prompt_to_process = None
     
     # Campo de entrada de texto con pregunta precargada
     prompt_default = st.session_state.get("pregunta_seleccionada", "")
@@ -275,82 +270,84 @@ with col2:
             if prompt.strip():
                 # Limpiar la pregunta seleccionada después de enviar
                 st.session_state.pregunta_seleccionada = ""
-                # Procesar la pregunta
-                st.session_state.mensajes.append({"role": "user", "content": prompt})
-                st.rerun()
+                prompt_to_process = prompt
     else:
         prompt = st.chat_input("Escribe tu consulta aquí...")
+        if prompt and prompt.strip():
+            prompt_to_process = prompt
     
-    # Botón limpiar chat en la columna del bot
+    # Procesar prompt si existe
+    if prompt_to_process:
+        # Agregar mensaje del usuario al historial
+        st.session_state.mensajes.append({"role": "user", "content": prompt_to_process})
+        
+        # Generar respuesta del asistente
+        numero_periodos = {
+            "Día": 30,
+            "Semana": 24,
+            "Mes": 12
+        }
+        
+        tiempo, frente_a_abt, frente_a_linea_base = generar_datos_energia(
+            maquina_seleccionada, 
+            periodo_seleccionado, 
+            numero_periodos[periodo_seleccionado]
+        )
+        
+        # Unidades según el periodo
+        unidad_periodo = {
+            "Día": "kWh/día",
+            "Semana": "kWh/semana",
+            "Mes": "kWh/mes"
+        }
+        unidad = unidad_periodo[periodo_seleccionado]
+        
+        # Respuestas basadas en palabras clave
+        if "consumo" in prompt_to_process.lower():
+            respuesta = f"La {maquina_seleccionada} tiene un consumo teórico promedio de {np.mean(frente_a_abt):.1f} {unidad} y real de {np.mean(frente_a_linea_base):.1f} {unidad} (análisis {periodo_seleccionado.lower()})."
+        elif "eficiencia" in prompt_to_process.lower():
+            diferencia = np.mean(frente_a_linea_base) - np.mean(frente_a_abt)
+            eficiencia = (1 - abs(diferencia)/np.mean(frente_a_abt)) * 100
+            respuesta = f"La eficiencia energética {periodo_seleccionado.lower()} es del {eficiencia:.1f}%. {'🟢 Excelente rendimiento.' if eficiencia > 90 else '🟡 Se recomienda revisión.'}"
+        elif "máximo" in prompt_to_process.lower() or "pico" in prompt_to_process.lower():
+            respuesta = f"Pico máximo ({periodo_seleccionado.lower()}): Teórico {np.max(frente_a_abt):.1f} {unidad}, Real {np.max(frente_a_linea_base):.1f} {unidad}."
+        elif "mínimo" in prompt_to_process.lower():
+            respuesta = f"Consumo mínimo ({periodo_seleccionado.lower()}): Teórico {np.min(frente_a_abt):.1f} {unidad}, Real {np.min(frente_a_linea_base):.1f} {unidad}."
+        elif "periodo" in prompt_to_process.lower():
+            respuesta = f"Actualmente estás visualizando datos por {periodo_seleccionado.lower()}. Puedes cambiar el periodo en el panel de control del sidebar."
+        elif "material" in prompt_to_process.lower():
+            materiales = {
+                "H75": "PP, PE, ABS", 
+                "Extrusora LEISTRITZ ZSE-27": "PVC, PP, Compounds", 
+                "Inyectora ENGEL e-motion 310": "PET, PA, PC"
+            }
+            respuesta = f"Materiales procesados: {materiales.get(maquina_seleccionada, 'N/A')}"
+        elif "estado" in prompt_to_process.lower() or "mantenimiento" in prompt_to_process.lower():
+            estados = {
+                "H75": "🟢 Operativa - Funcionamiento normal", 
+                "Extrusora LEISTRITZ ZSE-27": "🟢 Operativa - Funcionamiento normal", 
+                "Inyectora ENGEL e-motion 310": "🟡 En mantenimiento preventivo"
+            }
+            respuesta = f"Estado actual: {estados.get(maquina_seleccionada, 'N/A')}"
+        else:
+            respuesta = f"Analizando {maquina_seleccionada} por {periodo_seleccionado.lower()}. Puedes preguntar sobre: consumo, eficiencia, picos, periodo, materiales, estado o mantenimiento."
+        
+        # Agregar respuesta al historial
+        st.session_state.mensajes.append({"role": "assistant", "content": respuesta})
+        st.rerun()
+    
+    # Mostrar historial de mensajes
+    for mensaje in st.session_state.mensajes:
+        with st.chat_message(mensaje["role"]):
+            st.markdown(mensaje["content"])
+    
+    # Botón limpiar chat AL FINAL
+    st.markdown("---")
     if st.button("🗑️ Limpiar Chat", use_container_width=True):
         st.session_state.mensajes = []
         if "pregunta_seleccionada" in st.session_state:
             st.session_state.pregunta_seleccionada = ""
         st.rerun()
-    
-    # Procesar prompt si existe
-    if prompt and prompt.strip():
-        # Agregar mensaje del usuario al historial
-        st.session_state.mensajes.append({"role": "user", "content": prompt})
-        with st.chat_message("user"):
-            st.markdown(prompt)
-        
-        # Generar respuesta del asistente
-        with st.chat_message("assistant"):
-            numero_periodos = {
-                "Día": 30,
-                "Semana": 24,
-                "Mes": 12
-            }
-            
-            tiempo, frente_a_abt, frente_a_linea_base = generar_datos_energia(
-                maquina_seleccionada, 
-                periodo_seleccionado, 
-                numero_periodos[periodo_seleccionado]
-            )
-            
-            # Unidades según el periodo
-            unidad_periodo = {
-                "Día": "kWh/día",
-                "Semana": "kWh/semana",
-                "Mes": "kWh/mes"
-            }
-            unidad = unidad_periodo[periodo_seleccionado]
-            
-            # Respuestas basadas en palabras clave
-            if "consumo" in prompt.lower():
-                respuesta = f"La {maquina_seleccionada} tiene un consumo teórico promedio de {np.mean(frente_a_abt):.1f} {unidad} y real de {np.mean(frente_a_linea_base):.1f} {unidad} (análisis {periodo_seleccionado.lower()})."
-            elif "eficiencia" in prompt.lower():
-                diferencia = np.mean(frente_a_linea_base) - np.mean(frente_a_abt)
-                eficiencia = (1 - abs(diferencia)/np.mean(frente_a_abt)) * 100
-                respuesta = f"La eficiencia energética {periodo_seleccionado.lower()} es del {eficiencia:.1f}%. {'🟢 Excelente rendimiento.' if eficiencia > 90 else '🟡 Se recomienda revisión.'}"
-            elif "máximo" in prompt.lower() or "pico" in prompt.lower():
-                respuesta = f"Pico máximo ({periodo_seleccionado.lower()}): Teórico {np.max(frente_a_abt):.1f} {unidad}, Real {np.max(frente_a_linea_base):.1f} {unidad}."
-            elif "mínimo" in prompt.lower():
-                respuesta = f"Consumo mínimo ({periodo_seleccionado.lower()}): Teórico {np.min(frente_a_abt):.1f} {unidad}, Real {np.min(frente_a_linea_base):.1f} {unidad}."
-            elif "periodo" in prompt.lower():
-                respuesta = f"Actualmente estás visualizando datos por {periodo_seleccionado.lower()}. Puedes cambiar el periodo en el panel de control del sidebar."
-            elif "material" in prompt.lower():
-                materiales = {
-                    "H75": "PP, PE, ABS", 
-                    "Extrusora LEISTRITZ ZSE-27": "PVC, PP, Compounds", 
-                    "Inyectora ENGEL e-motion 310": "PET, PA, PC"
-                }
-                respuesta = f"Materiales procesados: {materiales.get(maquina_seleccionada, 'N/A')}"
-            elif "estado" in prompt.lower() or "mantenimiento" in prompt.lower():
-                estados = {
-                    "H75": "🟢 Operativa - Funcionamiento normal", 
-                    "Extrusora LEISTRITZ ZSE-27": "🟢 Operativa - Funcionamiento normal", 
-                    "Inyectora ENGEL e-motion 310": "🟡 En mantenimiento preventivo"
-                }
-                respuesta = f"Estado actual: {estados.get(maquina_seleccionada, 'N/A')}"
-            else:
-                respuesta = f"Analizando {maquina_seleccionada} por {periodo_seleccionado.lower()}. Puedes preguntar sobre: consumo, eficiencia, picos, periodo, materiales, estado o mantenimiento."
-            
-            st.markdown(respuesta)
-        
-        # Agregar respuesta al historial
-        st.session_state.mensajes.append({"role": "assistant", "content": respuesta})
 
 # Botón de control en el sidebar
 if st.sidebar.button("🔄 Actualizar Datos", use_container_width=True):
