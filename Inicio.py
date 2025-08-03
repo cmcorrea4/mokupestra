@@ -10,7 +10,7 @@ st.set_page_config(
 )
 
 # Título principal
-st.title("ESTRA - Plataforma inteligente de Analítica de eficiencia energética y productiva")
+st.title("ESTRA - Plataforma inteligente de Analítica de eficiencia energética y productiva.")
 
 # Función para generar datos sintéticos
 def generar_datos_energia(centro, periodo="Semana", numero_periodos=24):
@@ -123,7 +123,7 @@ def mostrar_estadisticas(centro_seleccionado, periodo_seleccionado):
         )       
 
 # Sidebar para controles
-st.sidebar.header("🔧 Panel de Control")
+st.sidebar.header("🔧 Panel de Control.")
 
 # Selectbox para máquinas
 maquinas = [
@@ -156,7 +156,7 @@ st.sidebar.info(info_periodo[periodo_seleccionado])
 
 # Información de la máquina seleccionada
 st.sidebar.markdown("---")
-st.sidebar.subheader("🔧 Información del Centro de costos de energía")
+st.sidebar.subheader("🔧 Información del Centro de costos de energía.")
 
 info_maquinas = {
     "H75": {
@@ -220,7 +220,7 @@ with col1:
     st.line_chart(df_grafico.set_index(etiqueta_tiempo[periodo_seleccionado]))
     
     # Mostrar estadísticas
-    st.subheader("📊 Métricas de Control")
+    st.subheader("📊 Métricas de Control:")
     mostrar_estadisticas(maquina_seleccionada, periodo_seleccionado)
     
     # Tabla de datos
@@ -228,7 +228,7 @@ with col1:
         st.dataframe(df_grafico, use_container_width=True)
 
 with col2:
-    st.subheader("🤖 ¡Hola! Soy tú asistente S.O.S EnergIA")
+    st.subheader("🤖 ¡Hola! Soy tú asistente S.O.S EnergIA.")
     
     # Inicializar el historial de chat
     if "mensajes" not in st.session_state:
@@ -324,7 +324,7 @@ with col_btn2:
 
 # Métricas de Diagnóstico
 st.markdown("---")
-st.subheader("📈 Métricas de Diagnóstico")
+st.subheader("📈 Métricas de Diagnóstico:")
 
 col_res1, col_res2, col_res3 = st.columns(3)
 
