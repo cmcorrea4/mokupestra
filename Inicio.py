@@ -102,14 +102,14 @@ maquinas = [
 ]
 
 maquina_seleccionada = st.sidebar.selectbox(
-    "Selecciona la Máquina:",
+    "Selecciona el centro de costos de energía:",
     maquinas,
     index=0
 )
 
 # Información de la máquina seleccionada
 st.sidebar.markdown("---")
-st.sidebar.subheader("🔧 Información de Máquina")
+st.sidebar.subheader("🔧 Información del Centro de costos de energía")
 
 info_maquinas = {
     "H75": {
@@ -257,17 +257,20 @@ for maquina in maquinas:
     })
 
 with col_res1:
+    Ton=1200
     total_teorico = sum([m['teorico'] for m in todas_maquinas])
     total_real = sum([m['real'] for m in todas_maquinas])
-    st.metric("Consumo Total Semanal", f"{total_real:.0f} kWh", f"{total_real - total_teorico:.0f} vs teórico")
+    st.metric("Lote por Molde", f"{Ton:.0f} kg", f"{total_real - total_teorico:.0f} vs teórico")
 
 with col_res2:
+    Lr=560
     eficiencia_promedio = np.mean([m['eficiencia'] for m in todas_maquinas])
-    st.metric("Eficiencia Promedio Planta", f"{eficiencia_promedio:.1f}%")
+    st.metric("Lote por referencia", f"{Lr:.0f} kg")
 
 with col_res3:
+    fpm=18
     maquinas_optimas = sum([1 for m in todas_maquinas if m['eficiencia'] > 90])
-    st.metric("Máquinas en Óptimo Estado", f"{maquinas_optimas}/{len(maquinas)}")
+    st.metric("Flujo por Molde", f"{fpm:0f} kg/h")
 
 # Footer
 st.markdown("---")
