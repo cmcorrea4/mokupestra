@@ -243,13 +243,10 @@ with col2:
     if len(st.session_state.mensajes) <= 2:
         st.markdown("**💡 Preguntas sugeridas:**")
         
-        col_btn1, col_btn2, col_btn3 = st.columns(1)
-        
-        with col_btn1:
-            if st.button("⚡ ¿Cuál es el consumo actual?", use_container_width=True):
-                prompt_sugerido = "¿Cuál es el consumo energético actual de esta máquina?"
-                st.session_state.mensajes.append({"role": "user", "content": prompt_sugerido})
-                st.rerun()
+        if st.button("⚡ ¿Cuál es el consumo actual?", use_container_width=True):
+            prompt_sugerido = "¿Cuál es el consumo energético actual de esta máquina?"
+            st.session_state.mensajes.append({"role": "user", "content": prompt_sugerido})
+            st.rerun()
         
         if st.button("📊 ¿Cómo está la eficiencia?", use_container_width=True):
             prompt_sugerido = "¿Cómo está la eficiencia energética de esta máquina?"
