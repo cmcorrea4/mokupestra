@@ -239,8 +239,8 @@ with col2:
             "content": "¿En que puedo ayudarte desde nuestro centro de analítica de datos para el Sistema de Gestión Energética?"
         })
     
-    # Preguntas sugeridas (solo mostrar si no hay muchos mensajes)
-    if len(st.session_state.mensajes) <= 2:
+    # Preguntas sugeridas (mostrar siempre al inicio de la sesión)
+    if len(st.session_state.mensajes) <= 6:  # Aumentado el límite para que se mantengan más tiempo
         st.markdown("**💡 Preguntas sugeridas:**")
         
         # Inicializar pregunta seleccionada si no existe
