@@ -291,7 +291,7 @@ st.markdown("---")
 st.markdown(
     """
     <div style='text-align: center; color: gray; font-size: 14px;'>
-    🏭 ESTRA - Sistema de Análisis de Centros de Costos de Energía | Powered by SUME y SOSPOL
+    🏭 ESTRA - Sistema de Análisis de Centros de Costos de Energía | Powered by SUME--SOSPOL
     </div>
     """, 
     unsafe_allow_html=True
