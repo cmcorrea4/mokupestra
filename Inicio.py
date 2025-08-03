@@ -267,7 +267,7 @@ with col2:
     prompt_default = st.session_state.get("pregunta_seleccionada", "")
     if prompt_default:
         # Mostrar la pregunta seleccionada en un input editable
-        prompt = st.text_input("Consulta sobre las máquinas:", value=prompt_default, key="input_prompt")
+        prompt = st.text_input("Escribe tú pregunta:", value=prompt_default, key="input_prompt")
         if st.button("📤 Enviar pregunta", use_container_width=True):
             if prompt.strip():
                 # Limpiar la pregunta seleccionada después de enviar
