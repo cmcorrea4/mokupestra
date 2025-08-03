@@ -62,33 +62,35 @@ def mostrar_estadisticas(centro_seleccionado):
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
+        CPCL=35
         st.metric(
-            label="CUSUM  Esperado",
-            value=f"{np.mean(frente_a_abt):.1f} kWh",
+            label="CUSUM  PCL",
+            value=f"+{CPCL:.0f} Millones",
             delta=f"±{np.std(frente_a_abt):.1f}"
         )
     
     with col2:
+        CABT
         st.metric(
-            label="CUSUM Alcanzado", 
-            value=f"{np.mean(frente_a_linea_base):.1f} kWh",
+            label="CUSUM ABT", 
+            value=f"-{CABT:.1f} Millones",
             delta=f"±{np.std(frente_a_linea_base):.1f}"
         )
     
     with col3:
-        diferencia = np.mean(frente_a_linea_base) - np.mean(frente_a_abt)
+        C02E=75
         st.metric(
-            label="Desviación Energética",
-            value=f"{diferencia:.1f} kWh",
+            label="C02 Eq.",
+            value=f"{CO2E:.1f} Ton",
             delta=f"{(diferencia/np.mean(frente_a_abt)*100):.1f}%"
         )
     
     with col4:
-        eficiencia = (1 - abs(diferencia)/np.mean(frente_a_abt)) * 100
+        Tendencia="Descendente"
         st.metric(
-            label="Eficiencia Energética",
-            value=f"{eficiencia:.1f}%",
-            delta="✅ Óptima" if eficiencia > 90 else "⚠️ Revisar"
+            label="Tendencia",
+            value=f"{Tendencia} ",
+            
         )
 
 # Sidebar para controles
