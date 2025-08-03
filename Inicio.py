@@ -65,7 +65,7 @@ def mostrar_estadisticas(centro_seleccionado):
         CPCL=35
         st.metric(
             label="CUSUM  PCL",
-            value=f"+{CPCL:.0f} Millones",
+            value=f"+{CPCL:.0f} MCOP",
             delta=f"±{np.std(frente_a_abt):.1f}"
         )
     
@@ -73,15 +73,15 @@ def mostrar_estadisticas(centro_seleccionado):
         CABT=25
         st.metric(
             label="CUSUM ABT", 
-            value=f"-{CABT:.1f} Millones",
+            value=f"-{CABT:.1f} MCOP",
             delta=f"±{np.std(frente_a_linea_base):.1f}"
         )
     
     with col3:
-        C02E=75
+        COeq=75
         st.metric(
             label="C02 Eq.",
-            value=f"{CO2E:.1f} Ton",
+            value=f"{COeq:.1f} Ton",
             delta=f"{(diferencia/np.mean(frente_a_abt)*100):.1f}%"
         )
     
